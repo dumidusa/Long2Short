@@ -9,13 +9,65 @@ import express from "express";
 
 //custom modules
 import config from '@/config';
-
+import router from '@/routes';
+import corsOptions from "@/lib/cors";
+import helmet from 'helmet';
+import cookieParser from 'cookie-parser';
+import compression from 'compression';
+import cors from 'cors';
+//initial  express
 const server = express();
+//use cors 
+server.use(cors(corsOptions));
+//secure headers
+server.use(helmet());
+//parser json request bodies
+server.use(express.json());
+//perser url encoded bodies 
+server.use(express.urlencoded({
+    extended:true
+}));
 
-server.get('/',(req,res)=>{
-    res.json({message: 'hello world'});
-})
-//start the server 
-server.listen(config.PORT, ()=>{
-    console.log(`server listening @ http://localhost : ${config.PORT}`);
-})
+//set the public folder
+server.use(express.static(`${__dirname}/public`));
+//compress response
+server.use(compression());
+
+//cookies parser
+server.use(cookieParser());
+
+//async func to initalize the application
+(async function (): Promise<void>{
+    try{
+        //register application routes under the root path
+        server.use('/',router);
+
+        //start the server 
+        server.listen(config.PORT, ()=>{
+          console.log(`server listening @ http://localhost : ${config.PORT}`);
+        });
+    }catch(error){
+        console.error('Faild to start server', error)
+    //exit the prosses to avoid the running in an unstable state
+    if(config.NODE_ENV === 'production'){
+        process.exit(1);
+    }
+    }
+} )();
+//handle graceful  server shutdown on termination signals
+const serverTermination = async (signal: NodeJS.Signals): Promise<void> =>{
+    try{
+        //log a warning indicating the server is shutting down
+        console.log('server shutdown',signal);
+
+        //exit the process cleanly
+        process.exit(0);
+    }catch(error){
+        //log any error during the shutting down
+        console.error('error during the shutdown',error);
+    }   
+}
+
+//listen for termination signal and trigger gracefuk shutdown
+process.on('SIGTERM',serverTermination);
+process.on('SIGINT',serverTermination);
