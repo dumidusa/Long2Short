@@ -6,15 +6,17 @@
 // node modules
 
 import express from "express";
+import helmet from 'helmet';
+import cookieParser from 'cookie-parser';
+import compression from 'compression';
+import cors from 'cors';
 
 //custom modules
 import config from '@/config';
 import router from '@/routes';
 import corsOptions from "@/lib/cors";
-import helmet from 'helmet';
-import cookieParser from 'cookie-parser';
-import compression from 'compression';
-import cors from 'cors';
+import {logger,logtail} from '@/lib/winston';
+
 //initial  express
 const server = express();
 //use cors 
@@ -44,10 +46,10 @@ server.use(cookieParser());
 
         //start the server 
         server.listen(config.PORT, ()=>{
-          console.log(`server listening @ http://localhost : ${config.PORT}`);
+          logger.info(`server listening @ http://localhost : ${config.PORT}`);
         });
     }catch(error){
-        console.error('Faild to start server', error)
+        logger.info('Faild to start server', error)
     //exit the prosses to avoid the running in an unstable state
     if(config.NODE_ENV === 'production'){
         process.exit(1);
@@ -58,13 +60,16 @@ server.use(cookieParser());
 const serverTermination = async (signal: NodeJS.Signals): Promise<void> =>{
     try{
         //log a warning indicating the server is shutting down
-        console.log('server shutdown',signal);
+        logger.info('server shutdown',signal);
+
+        //flush any remaing logs to logstal before exiting
+        logtail.flush();
 
         //exit the process cleanly
         process.exit(0);
     }catch(error){
         //log any error during the shutting down
-        console.error('error during the shutdown',error);
+        logger.info('error during the shutdown',error);
     }   
 }
 
