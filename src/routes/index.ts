@@ -5,6 +5,9 @@
 
 //node modules
 import {Router} from 'express';
+import authRouter from '@/routes/auth'; 
+//routes
+
 
 //initial express router
 const router = Router();
@@ -18,5 +21,7 @@ router.get('/',(req,res)=>{
         timestamp: new Date().toISOString(),
     })
 })
+//auth routes
+router.use('/auth', authRouter);
 
 export default router;

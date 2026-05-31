@@ -13,9 +13,12 @@ import cors from 'cors';
 
 //custom modules
 import config from '@/config';
-import router from '@/routes';
 import corsOptions from "@/lib/cors";
 import {logger,logtail} from '@/lib/winston';
+import {connectToDatabase,disconnectDatabase} from '@/lib/mongoose';
+
+//routes
+import router from '@/routes';
 
 //initial  express
 const server = express();
@@ -41,6 +44,8 @@ server.use(cookieParser());
 //async func to initalize the application
 (async function (): Promise<void>{
     try{
+        // establish a connection to the mongodb
+        await connectToDatabase();
         //register application routes under the root path
         server.use('/',router);
 
@@ -59,6 +64,8 @@ server.use(cookieParser());
 //handle graceful  server shutdown on termination signals
 const serverTermination = async (signal: NodeJS.Signals): Promise<void> =>{
     try{
+        //disconnect from the mongoDB database
+        await disconnectDatabase();
         //log a warning indicating the server is shutting down
         logger.info('server shutdown',signal);
 
