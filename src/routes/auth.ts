@@ -16,6 +16,10 @@ import expressRateLimit from "@/lib/expressRateLimit";
 import register from '@/controllers/auth/register';
 //middlewares
 import validationError from "@/middlewares/validationErrors";
+
+//models 
+import User from "@/models/user";
+
 //initial express router
 const router = Router();
 
@@ -29,9 +33,16 @@ router.post('/register',
     .withMessage('email is required')
     .isEmail()
     .withMessage('invalid email adress')
-     .custom(async (value) =>{
-        //todo do this model after configure user model
-     })
+    .custom(async (value) =>{
+        //check this  email already in used 
+        const userExists = await User.exists({email : value}).exec();
+
+        //handle case when duplicate email found
+        if(userExists){
+            throw new Error("this email is already in use");
+            
+        }
+    })
     ,
     body('password')
     .trim()
