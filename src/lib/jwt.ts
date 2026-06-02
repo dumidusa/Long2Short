@@ -8,7 +8,6 @@ import jwt from 'jsonwebtoken';
 
 //custom modules
 import config from '@/config'
-
 //types
 import type {Types} from 'mongoose';
 import {JwtPayload} from 'jsonwebtoken';
@@ -36,4 +35,18 @@ const genarateRefreshToken =(payload:TokenPayload) =>{
 };
 
 
-export {genarateAccessToken,genarateRefreshToken};
+//verify accessToken
+const verifyAccessToken = (accessToken: string): string | JwtPayload =>{
+    return jwt.verify(accessToken, config.JWT_ACCESS_SECRET);
+}
+
+//verify accessToken
+const verifyRefreshToken = (refreshToken: string) : string | JwtPayload=>{
+    return jwt.verify(refreshToken, config.JWT_REFRESH_SECRET);
+}
+
+export {
+    genarateAccessToken,
+    genarateRefreshToken,
+    verifyAccessToken,
+    verifyRefreshToken};
