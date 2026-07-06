@@ -19,7 +19,7 @@ const authentication = (
     //handle case when cleint dont send request with accesstoken
     if(!authorization){
         res.status(401).json({
-            code : 'TokenError',
+            code : 'AccessTokenError',
             message: 'Access token is required',
         });
         return;
@@ -38,7 +38,7 @@ const authentication = (
         //handle case when accessToken expired!
         if(error instanceof TokenExpiredError){
             res.status(401).json({
-                code: 'TokenError',
+                code: 'AccessTokenExpired',
                 message:'Access token expired',
             });
             return;
@@ -47,7 +47,7 @@ const authentication = (
         //handle case when accessToken is invalid 
         if(error instanceof JsonWebTokenError){
             res.status(401).json({
-                code :'TokenError',
+                code :'AccessTokenError',
                 message: 'Invalid access token',
             });
             return;
