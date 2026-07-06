@@ -34,6 +34,15 @@ const genarateRefreshToken =(payload:TokenPayload) =>{
 
 };
 
+//genarate a jwt token for reset password
+const genaratePasswordResetToken = (payload: ResetLinkPayload) =>{
+    const resetToken = jwt.sign(payload, config.JWT_PASSWORD_RESET_SECRET,{
+        expiresIn: '1h',
+    });
+
+    return resetToken;
+}
+
 
 //verify accessToken
 const verifyAccessToken = (accessToken: string): string | JwtPayload =>{
@@ -45,8 +54,16 @@ const verifyRefreshToken = (refreshToken: string) : string | JwtPayload=>{
     return jwt.verify(refreshToken, config.JWT_REFRESH_SECRET);
 }
 
+//verify password reset token
+const verifyPasswordResetToken = (resetToken: string): string | JwtPayload=>{
+    return jwt.verify(resetToken, config.JWT_PASSWORD_RESET_SECRET);
+};
+
 export {
     genarateAccessToken,
     genarateRefreshToken,
+    genaratePasswordResetToken,
     verifyAccessToken,
-    verifyRefreshToken};
+    verifyRefreshToken,
+    verifyPasswordResetToken,
+};

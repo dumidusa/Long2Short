@@ -5,6 +5,7 @@
 
 //node modules
 import { Router } from "express";
+//import {request,response} from "express";
 import {body} from 'express-validator';
 import bcrypt from 'bcrypt';
 
@@ -15,6 +16,11 @@ import bcrypt from 'bcrypt';
 import register from '@/controllers/auth/register';
 import login from '@/controllers/auth/login';
 import logout from '@/controllers/auth/logout';
+import refreshToken from "@/controllers/auth/refreshToken";
+import forgotPassword from "@/controllers/auth/forgotPassword";
+
+
+
 
 //middlewares
 import validationError from "@/middlewares/validationErrors";
@@ -128,4 +134,29 @@ router.delete(
     logout
 
 )
+
+//get route to refresh token
+router.get('/refresh-token', expressRateLimit('basic'), refreshToken);
+
+router.post(
+    '/forgot-password',
+    expressRateLimit('basic'),
+    body('email')
+    .trim()
+    .notEmpty()
+    .withMessage('Email is required')
+    .isEmail()
+    .withMessage('Invalid email address')
+    .custom(async(email)=>{
+        //checl provided email exist in db
+        const userExists = await User.exists({ email}).exec();
+        //handle case when email doesn't exist
+        if(!userExists){
+            throw new Error('No user found with this email');
+        }
+    }),
+    validationError,
+    forgotPassword,
+)
+
 export default router;
