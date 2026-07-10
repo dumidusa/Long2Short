@@ -7,6 +7,8 @@
 
 import {logger} from '@/lib/winston';
 import config from '@/config';
+import nodemailerTransport from '@/lib/nodemailer';
+import { resetLinkTemplate } from '@/mailTemplates/resetLink';
 
 //modules
 import User from '@/models/user';
@@ -30,9 +32,22 @@ const forgotPassword = async (req: Request, res: Response): Promise<void> =>{
         .exec();
 
         //handle case when user not found
-        if(!user) return;
+        if(!user){
+            res.sendStatus(204);
+            return;
+        }
 
         //send the reset token to user email
+        await nodemailerTransport.sendMail({
+            from: '"Long2Short" <sahandumidu4@gmail.com>',
+            to: email,
+            subject: 'Password Reset Request',
+            html: resetLinkTemplate({
+                name: user.name,
+                resetLink: `${config.CLIENT_ORIGIN}/reset-password?token=${passwordResetToken}`
+            }),
+        });
+
 
         //store the reset token to user email
         user.passwordResetToken = passwordResetToken;

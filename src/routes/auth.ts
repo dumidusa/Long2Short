@@ -18,7 +18,7 @@ import login from '@/controllers/auth/login';
 import logout from '@/controllers/auth/logout';
 import refreshToken from "@/controllers/auth/refreshToken";
 import forgotPassword from "@/controllers/auth/forgotPassword";
-
+import resetPassword from "@/controllers/auth/resetPassword";
 
 
 
@@ -157,6 +157,20 @@ router.post(
     }),
     validationError,
     forgotPassword,
+);
+
+
+// post route to reset password
+router.post(
+    '/reset-password',
+    expressRateLimit('passReset'),
+    body('password')
+    .notEmpty()
+    .withMessage('Password is required')
+    .isLength({min: 8})
+    .withMessage('Password must be at least 8 characters long'),
+    validationError,
+    resetPassword
 )
 
 export default router;
